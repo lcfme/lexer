@@ -30,18 +30,21 @@ Lexer.prototype.nextToken = function(fn) {
         type: Token.Types.EOF,
         literal: null
       });
+      this.readChar();
       break;
     case '{':
       token = new Token({
         type: Token.Types.LBRACE,
         literal: this.ch
       });
+      this.readChar();
       break;
     case '}':
       token = new Token({
         type: Token.Types.RBRACE,
         literal: this.ch
       });
+      this.readChar();
       break;
 
     case '[':
@@ -49,6 +52,7 @@ Lexer.prototype.nextToken = function(fn) {
         type: Token.Types.LBRACKET,
         literal: this.ch
       });
+      this.readChar();
       break;
 
     case ']':
@@ -56,6 +60,7 @@ Lexer.prototype.nextToken = function(fn) {
         type: Token.Types.RBRACKET,
         literal: this.ch
       });
+      this.readChar();
       break;
 
     case ',':
@@ -63,6 +68,7 @@ Lexer.prototype.nextToken = function(fn) {
         type: Token.Types.COMMA,
         literal: this.ch
       });
+      this.readChar();
       break;
 
     case '"':
@@ -80,6 +86,7 @@ Lexer.prototype.nextToken = function(fn) {
         type: Token.Types.STR,
         literal: val
       });
+      this.readChar();
       break;
 
     case ':':
@@ -87,6 +94,22 @@ Lexer.prototype.nextToken = function(fn) {
         type: Token.Types.COLON,
         literal: this.ch
       });
+      this.readChar();
+      break;
+    case '/':
+      if (this.lookHead(1) === '/') {
+        this.readChar();
+        var val = '';
+        var ch;
+        while ((ch = this.readChar()) && ch !== '\n') {
+          val += ch;
+        }
+        token = new Token({
+          type: Token.Types.COMMENT,
+          literal: val
+        });
+        this.readChar();
+      }
       break;
     default:
       if (/\d/.test(this.ch)) {
@@ -126,8 +149,8 @@ Lexer.prototype.nextToken = function(fn) {
           });
         } else {
           token = new Token({
-            type: Token.Types.ILLEGAL,
-            literal: this.ch
+            type: Token.Types.IDENTIFIER,
+            literal: val
           });
         }
       } else {
@@ -135,9 +158,9 @@ Lexer.prototype.nextToken = function(fn) {
           type: Token.Types.ILLEGAL,
           literal: this.ch
         });
+        this.readChar();
       }
   }
-  this.readChar();
   return token;
 };
 
@@ -182,7 +205,9 @@ Token.Types = {
   NUM: 'num',
   TRUE: 'true',
   FALSE: 'false',
-  NULL: 'null'
+  NULL: 'null',
+  COMMENT: 'comment',
+  IDENTIFIER: 'identifier'
 };
 
 Token.Keywords = {
